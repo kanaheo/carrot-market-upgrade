@@ -1,9 +1,11 @@
 "use server";
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_REGEX,
+  PASSWORD_REGEX_ERROR,
+} from "@/lib/constants";
 import { z } from "zod";
 
-const passwordRegex = new RegExp(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/
-);
 const checkUsername = (username: string) => !username.includes("potato");
 const checkPasswords = ({
   password,
@@ -20,8 +22,6 @@ const formSchema = z
         invalid_type_error: "Username must be a string!",
         required_error: "Where is my username?",
       })
-      .min(3, "Way too short!!!")
-      .max(10, "That is too long!!!")
       .toLowerCase()
       .trim()
       .transform((username) => username.toLowerCase())
@@ -29,12 +29,9 @@ const formSchema = z
     email: z.string().email().toLowerCase(),
     password: z
       .string()
-      .min(4)
-      .regex(
-        passwordRegex,
-        "A Password must have lowercase, UPPERCASE, a number and special characters."
-      ),
-    confirm_password: z.string().min(10),
+      .min(PASSWORD_MIN_LENGTH)
+      .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+    confirm_password: z.string().min(PASSWORD_MIN_LENGTH),
   })
   .refine(checkPasswords, {
     message: "Both passwords should be the same!",
@@ -50,7 +47,7 @@ export async function createAccount(prevState: any, formData: FormData) {
   };
   const result = formSchema.safeParse(data);
   if (!result.success) {
-    return result.error.flatten();
+    return result.error.flatten(); // 어디서 에러가 발생했는지 체크 가능함
   } else {
     console.log(result.data);
   }
