@@ -1,31 +1,14 @@
 "use server";
 
-import {
-  PASSWORD_MIN_LENGTH,
-  PASSWORD_REGEX,
-  PASSWORD_REGEX_ERROR,
-} from "@/lib/constants";
+import validator from "validator";
 import { z } from "zod";
 
-const formSchema = z.object({
-  email: z.string().email().toLowerCase(),
-  password: z
-    .string({
-      required_error: "Password is required",
-    })
-    .min(PASSWORD_MIN_LENGTH)
-    .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
-});
+const phoneSchema = z.string().trim().refine(validator.isMobilePhone);
 
-export async function smsVerification(prevState: any, formData: FormData) {
-  const data = {
-    email: formData.get("email"),
-    password: formData.get("password"),
-  };
-  const result = formSchema.safeParse(data);
-  if (!result.success) {
-    return result.error.flatten();
-  } else {
-    console.log(result.data);
-  }
+// coerce는 강제로 타입 지정해주기
+const tokenSchema = z.coerce.number().min(100000).max(999999);
+
+export async function smsLogIn(prevState: any, formData: FormData) {
+  tokenSchema.parse(formData.get("token"));
+  console.log(typeof tokenSchema.parse(formData.get("token")));
 }
