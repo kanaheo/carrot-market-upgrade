@@ -1,5 +1,8 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"],
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
   "rules": {
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
@@ -12,6 +15,15 @@
         "destructuredArrayIgnorePattern": "^_",
         "varsIgnorePattern": "^_",
         "ignoreRestSiblings": true
+      }
+    ],
+    // 쓸데없는 빈 줄 제한
+    "no-multiple-empty-lines": [
+      "warn",
+      {
+        "max": 1, // 최대 빈 줄 1줄 허용
+        "maxEOF": 0, // 파일 끝에 빈 줄 허용 안 함
+        "maxBOF": 0 // 파일 시작 부분 빈 줄 허용 안 함
       }
     ],
     "@typescript-eslint/no-explicit-any": "off"
