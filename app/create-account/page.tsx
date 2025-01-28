@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Button from "@/components/button";
 import Input from "@/components/input";
 import SocialLogin from "@/components/social-login";
@@ -9,6 +10,19 @@ import { createAccount } from "./actions";
 
 export default function CreateAccount() {
   const [state, dispatch] = useActionState(createAccount, null);
+
+  const [formValues, setFormValues] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
     <div className="flex flex-col gap-10 py-8 px-6">
       <div className="flex flex-col gap-2 *:font-medium">
@@ -24,6 +38,8 @@ export default function CreateAccount() {
           errors={state?.fieldErrors.username}
           minLength={3}
           maxLength={10}
+          value={formValues.username}
+          onChange={handleChange}
         />
         <Input
           name="email"
@@ -31,6 +47,8 @@ export default function CreateAccount() {
           placeholder="Email"
           required
           errors={state?.fieldErrors.email}
+          value={formValues.email}
+          onChange={handleChange}
         />
         <Input
           name="password"
@@ -39,6 +57,8 @@ export default function CreateAccount() {
           minLength={PASSWORD_MIN_LENGTH}
           required
           errors={state?.fieldErrors.password}
+          value={formValues.password}
+          onChange={handleChange}
         />
         <Input
           name="confirm_password"
@@ -47,6 +67,8 @@ export default function CreateAccount() {
           minLength={PASSWORD_MIN_LENGTH}
           required
           errors={state?.fieldErrors.confirm_password}
+          value={formValues.confirm_password}
+          onChange={handleChange}
         />
         <Button text="Create account" />
       </form>
