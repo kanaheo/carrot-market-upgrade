@@ -15,6 +15,7 @@
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "daisyui": "^4.12.14",
+    "iron-session": "^8.0.4",
     "next": "15.0.2",
     "prisma": "^6.2.1",
     "react": "^18.3.1",
