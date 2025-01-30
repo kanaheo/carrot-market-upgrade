@@ -10,7 +10,9 @@ async function getUser() {
         id: (await session).id,
       },
     });
-    return user;
+    if (user) {
+      return user;
+    }
   }
   notFound();
 }
