@@ -1,29 +1,19 @@
 import db from "@/lib/db";
+import { getAccessTokenResponse, getUserEmailResponse, getUserProfileResponse, saveSession } from "@/lib/github";
 import getSession from "@/lib/session";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
   if (!code) {
-    notFound();
+    return new Response(null, {
+      status: 400,
+    });
   }
 
-  const accessTokenParams = new URLSearchParams({
-    client_id: process.env.GITHUB_CLIENT_ID!,
-    client_secret: process.env.GITHUB_CLIENT_SECRET!,
-    code,
-  }).toString();
-  const accessTokenURL = `https://github.com/login/oauth/access_token?${accessTokenParams}`;
-
-  const accessTokenResponse = await fetch(accessTokenURL, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-  });
-  const { error, access_token } = await accessTokenResponse.json();
+  const { error, access_token } = await getAccessTokenResponse(code);
 
   if (error) {
     return new Response(null, {
@@ -31,13 +21,9 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const userProfileResponse = await fetch("https://api.github.com/user", {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-    cache: "no-cache",
-  });
-  const { id, avatar_url, login } = await userProfileResponse.json();
+  // must different user access token
+  const { id, avatar_url, login } = await getUserProfileResponse(access_token);
+
   const user = await db.user.findUnique({
     where: {
       github_id: id + "",
@@ -46,17 +32,28 @@ export async function GET(request: NextRequest) {
       id: true,
     },
   });
-
   if (user) {
-    const session = await getSession();
-    session.id = user.id;
-    await session.save();
-    return redirect("/profile");
+    await saveSession(user, "profile");
+  }
+
+  const email = await getUserEmailResponse(access_token);
+  const emailUser = await db.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (emailUser) {
+    await saveSession(emailUser, "profile");
   }
 
   const newUser = await db.user.create({
     data: {
-      username: login,
+      username: login + "_gh_user",
+      email,
       github_id: id + "",
       avatar: avatar_url,
     },
@@ -65,8 +62,7 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const session = await getSession();
-  session.id = newUser.id;
-  await session.save();
-  return redirect("/profile");
+  if (newUser) {
+    await saveSession(newUser, "profile");
+  }
 }
