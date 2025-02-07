@@ -85,12 +85,12 @@ export async function smsLogIn(prevState: ActionState, formData: FormData) {
         },
       });
       // send the token using twilio
-      const client = twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!);
-      await client.messages.create({
-        body: `Your Carrot verification code is : ${token}`,
-        from: process.env.TWILIO_PHONE_NUMBER!,
-        to: process.env.MY_PHONE_NUMBER!, // resultPhone.data but test my phone number
-      });
+      // const client = twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!);
+      // await client.messages.create({
+      //   body: `Your Carrot verification code is : ${token}`,
+      //   from: process.env.TWILIO_PHONE_NUMBER!,
+      //   to: process.env.MY_PHONE_NUMBER!, // resultPhone.data but test my phone number
+      // });
       return {
         token: true,
       };
